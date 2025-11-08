@@ -1,806 +1,292 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0ea5e9">
-    <meta name="description" content="لوحة تحكم إدارة الشكاوى - نظام متكامل لإدارة وتتبع الشكاوى">
-    <title>لوحة تحكم إدارة الشكاوى</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- OneSignal SDK -->
-    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-    <script>
-      window.OneSignalDeferred = window.OneSignalDeferred || [];
-      OneSignalDeferred.push(async function(OneSignal) {
-        await OneSignal.init({
-          appId: "2ccf7c9b-680e-47f6-b6d6-0729f3dbd452",
-          notifyButton: { enable: false }
-        });
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#000000"/>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>إدارة الشكاوى | Cesaro</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- OneSignal Web SDK -->
+  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+  <script>
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    OneSignalDeferred.push(async function(OneSignal) {
+      await OneSignal.init({
+        appId: "2ccf7c9b-680e-47f6-b6d6-0729f3dbd452",
+        notifyButton: { enable: false }
       });
-    </script>
-    <!-- Manifest -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- Meta tags for iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="إدارة الشكاوى">
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE5MiIgaGVpZ2h0PSIxOTIiIHJ4PSI0MCIgZmlsbD0iIzBlYTVlOSIvPjxwYXRoIGQ9Ik05NiA1NkM5NiA1NiAxMDggNDAgMTM2IDQwQzE2NCA0MCAxNzYgNTYgMTc2IDU2QzE3NiA1NiAxODQgNzIgMTg0IDkyQzE4NCAxMTIgMTY0IDEzNiAxMzYgMTM2QzEwOCAxMzYgOTYgMTIwIDk2IDEyMEM5NiAxMjAgODQgMTM2IDU2IDEzNkMyOCAxMzYgOCAxMTIgOCA5MkM4IDcyIDE2IDU2IDE2IDU2QzE2IDU2IDI4IDQwIDU2IDQwQzg0IDQwIDk2IDU2IDk2IDU2WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNNjQgODhDNzIuODM2NiA4OCA4MCA4MC44MzY2IDgwIDcyQzgwIDYzLjE2MzQgNzIuODM2NiA1NiA2NCA1NkM1NS4xNjM0IDU2IDQ4IDYzLjE2MzQgNDggNzJDNDggODAuODM2NiA1NS4xNjM0IDg4IDY0IDg4WiIgZmlsbD0id2hpdGUiLz48cGF0aCBkPSJNMTI4IDcyQzEyOCA4MC44MzY2IDEyMC44MzcgODggMTEyIDg4QzEwMy4xNjMgODggOTYgODAuODM2NiA5NiA3MkM5NiA2My4xNjM0IDEwMy4xNjMgNTYgMTEyIDU2QzEyMC44MzcgNTYgMTI4IDYzLjE2MzQgMTI4IDcyWiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=">
-    <style>
-    :root {
-            --primary: #0ea5e9;      /* أزرق سماوي هادي */
-            --secondary: #8b5cf6;    /* بنفسجي أنيق */
-            --success: #10b981;      /* أخضر زمردي */
-            --warning: #f59e0b;      /* برتقالي ذهبي */
-            --light: #9ca3af;        /* رمادي فاتح للنصوص الثانوية */
-            --dark: #111827;         /* أسود كحلي غامق */
-            --background: #1f2937;   /* رمادي مزرق غامق للخلفية */
-            --card-bg: #273449;      /* كروت أغمق شوية */
-            --text: #ffffffff;       /* أبيض أنيق للنصوص */
-        }
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        header {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            padding: 1rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .logo {
-            font-size: 1.2rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .admin-info {
-            display: flex;
-            align-items: center;
-            position: relative;
-            gap: 8px;
-        }
-        .admin-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: white;
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-        .install-btn {
-            background-color: var(--success);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 12px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            margin-left: 10px;
-            transition: all 0.3s ease;
-        }
-        .install-btn:hover {
-            background-color: #0da271;
-        }
-        select {
-            padding: 10px 15px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 1rem;
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: left 15px center;
-            background-size: 16px;
-            padding-right: 15px;
-            padding-left: 40px;
-        }
-        select option {
-            background-color: var(--card-bg);
-            color: var(--text);
-            padding: 10px;
-        }
-        select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
-        }
-        select:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-        }
-        .stat-card {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 12px;
-            padding: 1rem;
-            text-align: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        .stat-number {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin: 0.3rem 0;
-        }
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-            padding: 1.2rem;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
-        }
-        h2 {
-            color: var(--primary);
-            margin-bottom: 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1.3rem;
-        }
-        .filters {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            min-width: 100%;
-        }
-        label {
-            margin-bottom: 6px;
-            font-weight: 600;
-            color: var(--light);
-            font-size: 0.9rem;
-        }
-        input {
-            padding: 10px 12px;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            font-size: 1rem;
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-        }
-        .complaints-list {
-            margin-top: 1.5rem;
-        }
-        .complaint-item {
-            background-color: var(--card-bg);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 0.8rem;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border-left: 4px solid var(--primary);
-        }
-        .complaint-info {
-            flex: 1;
-            min-width: 0;
-        }
-        .complaint-info > div:first-child {
-            font-weight: bold;
-            font-size: 1rem;
-            margin-bottom: 6px;
-            color: var(--text);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .complaint-text {
-            margin: 6px 0;
-            line-height: 1.5;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            font-size: 0.95rem;
-        }
-        .complaint-meta {
-            display: flex;
-            gap: 12px;
-            margin-top: 5px;
-            font-size: 0.8rem;
-            color: var(--light);
-            flex-wrap: wrap;
-        }
-        .complaint-actions {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .status-badge {
-            padding: 0.3rem 0.7rem;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .status-resolved {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-rejected {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .rating-stars {
-            display: flex;
-            margin: 4px 0;
-        }
-        .star {
-            color: #ddd;
-            margin-left: 2px;
-            font-size: 0.9rem;
-        }
-        .star.filled {
-            color: #f59e0b;
-        }
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-        }
-        .btn-view {
-            background-color: var(--primary);
-            color: white;
-        }
-        .btn-view:hover {
-            background-color: var(--secondary);
-        }
-        .btn-edit {
-            background-color: var(--warning);
-            color: white;
-        }
-        .btn-edit:hover {
-            background-color: #e69008;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-            padding: 10px;
-            overflow-y: auto;
-        }
-        .modal-content {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            width: 100%;
-            max-width: 100%;
-            margin: 60px auto 20px;
-            padding: 1.5rem;
-            position: relative;
-            animation: slideIn 0.3s ease;
-            max-height: calc(100vh - 80px);
-            overflow-y: auto;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        @keyframes slideIn {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        .close-modal {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.3s ease;
-            z-index: 10;
-        }
-        .close-modal:hover {
-            color: var(--warning);
-        }
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 90%;
-        }
-        .toast {
-            background-color: white;
-            color: #333;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            animation: toastIn 0.5s ease, toastOut 0.5s ease 4.5s forwards;
-            display: flex;
-            align-items: center;
-            border-right: 5px solid var(--primary);
-            font-size: 0.9rem;
-        }
-        .toast.success {
-            border-right-color: #28a745;
-        }
-        .toast.error {
-            border-right-color: #dc3545;
-        }
-        .toast.info {
-            border-right-color: #17a2b8;
-        }
-        .toast.new-complaint {
-            border-right-color: var(--warning);
-            flex-direction: column;
-            align-items: flex-start;
-        }
-        .toast-icon {
-            font-size: 1.3rem;
-            margin-left: 8px;
-        }
-        .toast.success .toast-icon {
-            color: #28a745;
-        }
-        .toast.error .toast-icon {
-            color: #dc3545;
-        }
-        .toast.info .toast-icon {
-            color: #17a2b8;
-        }
-        .toast.new-complaint .toast-icon {
-            color: var(--warning);
-        }
-        @keyframes toastIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        @keyframes toastOut {
-            from { transform: translateX(0); opacity: 1; }
-            to { transform: translateX(100%); opacity: 0; }
-        }
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--warning);
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: #6c757d;
-        }
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #dee2e6;
-        }
-        .auto-refresh {
-            display: flex;
-            align-items: center;
-            margin-top: 1rem;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .sound-control {
-            display: flex;
-            align-items: center;
-            margin-top: 0.8rem;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .sound-test {
-            display: flex;
-            align-items: center;
-            margin-top: 0.8rem;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-        .test-sound-btn {
-            background-color: var(--success);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        .status-selector {
-            display: flex;
-            gap: 8px;
-            margin-top: 1rem;
-            flex-wrap: wrap;
-        }
-        .status-btn {
-            padding: 0.5rem 0.8rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-        .status-btn.active {
-            transform: scale(1.05);
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
-        }
-        .status-btn-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .status-btn-resolved {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        .status-btn-rejected {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .modal-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 1.2rem;
-            gap: 10px;
-        }
-        .comments-section {
-            margin-top: 1.2rem;
-            padding-top: 1rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .comment-input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            margin-bottom: 10px;
-            resize: vertical;
-            min-height: 80px;
-            background-color: rgba(255, 255, 255, 0.05);
-            color: var(--text);
-            font-size: 0.95rem;
-        }
-        .comments-list {
-            margin-top: 1rem;
-            max-height: 150px;
-            overflow-y: auto;
-        }
-        .comment-item {
-            background-color: rgba(255, 255, 255, 0.05);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 8px;
-            border-right: 3px solid var(--primary);
-            font-size: 0.9rem;
-        }
-        .comment-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 6px;
-            font-size: 0.75rem;
-            color: #9ca3af;
-        }
-        .comment-submit-btn {
-            background-color: var(--success);
-            color: white;
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9rem;
-        }
-        .comment-submit-btn:hover {
-            background-color: #0da271;
-        }
-        .comment-form {
-            display: flex;
-            flex-direction: column;
-        }
-        .no-comments {
-            text-align: center;
-            padding: 1rem;
-            color: #6c757d;
-            font-style: italic;
-            font-size: 0.9rem;
-        }
-        @media (max-width: 768px) {
-            .container { padding: 10px; }
-            header { flex-direction: row; gap: 10px; padding: 0.8rem; }
-            .logo { font-size: 1.1rem; }
-            .card { padding: 1rem; border-radius: 10px; }
-            .filters { flex-direction: column; gap: 10px; }
-            .filter-group { min-width: 100%; }
-            .complaint-info > div:first-child { flex-direction: column; align-items: flex-start; }
-            .complaint-meta { flex-direction: column; gap: 5px; }
-            .complaint-actions { flex-direction: row; justify-content: space-between; }
-            .modal-content { width: 100%; padding: 1.2rem; margin: 50px auto 20px; border-radius: 10px; }
-            .status-selector { flex-direction: row; justify-content: space-between; }
-            .status-btn { flex: 1; justify-content: center; }
-            .modal-actions { flex-direction: column; gap: 8px; }
-            select { background-position: left 10px center; padding-left: 35px; }
-            .stats-container { grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
-            .stat-card { padding: 0.8rem; }
-            .stat-number { font-size: 1.5rem; }
-        }
-        @media (min-width: 768px) {
-            .complaint-item { flex-direction: row; justify-content: space-between; align-items: center; }
-            .complaint-actions { justify-content: flex-end; margin-top: 0; padding-top: 0; border-top: none; flex-direction: column; align-items: flex-end; min-width: 140px; }
-            .filter-group { min-width: 200px; }
-        }
-        .detail-row {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding-bottom: 0.5rem;
-        }
-        .detail-label {
-            font-weight: bold;
-            color: var(--primary);
-            margin-bottom: 5px;
-            font-size: 0.9rem;
-        }
-        .detail-value {
-            flex: 1;
-            font-size: 0.95rem;
-        }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--secondary); }
-        @media (min-width: 1024px) {
-            .detail-row { flex-direction: row; }
-            .detail-label { width: 120px; margin-bottom: 0; }
-        }
-        @supports(padding: max(0px)) {
-            .container, header {
-                padding-left: max(1rem, env(safe-area-inset-left));
-                padding-right: max(1rem, env(safe-area-inset-right));
-            }
-            header {
-                padding-top: max(0.8rem, env(safe-area-inset-top));
-            }
-        }
-    </style>
+    });
+  </script>
+  <style>
+    /* تحسينات إضافية للواجهة */
+    .install-pwa-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: #000;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 1000;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      animation: pulse 2s infinite;
+    }
+    
+    .install-pwa-btn:hover {
+      transform: scale(1.1);
+      background: #333;
+    }
+    
+    .install-pwa-btn i {
+      font-size: 24px;
+    }
+    
+    .install-pwa-btn.hidden {
+      display: none;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @media (max-width: 768px) {
+      .install-pwa-btn {
+        bottom: 70px;
+        left: 15px;
+        width: 50px;
+        height: 50px;
+      }
+    }
+
+    /* أنماط الردود */
+    .comments-section, .add-comment-section {
+      margin-top: 20px;
+      padding-top: 15px;
+      border-top: 1px solid #eee;
+    }
+
+    .comments-list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .comment-item {
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      border-left: 3px solid #000;
+    }
+
+    .comment-author {
+      font-weight: bold;
+      color: #000;
+    }
+
+    .comment-date {
+      font-size: 12px;
+      color: #777;
+      margin-top: 4px;
+    }
+
+    .add-comment-section textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .comment-btn {
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Tajawal', sans-serif;
+    }
+    .comment-btn:hover {
+      background: #218838;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <div class="logo">
-            <i class="fas fa-headset"></i> نظام إدارة الشكاوى
+  <div class="app-container">
+    <div class="top-bar">
+      <h2 class="page-title">إدارة الشكاوى</h2>
+      <div class="top-bar-actions">
+        <a href="https://calamari-message.netlify.app/" class="stats-btn">
+          <i class="fas fa-chart-line"></i> ارسال اشعارات للمتابعين
+        </a>
+        <div class="user-avatar">c</div>
+      </div>
+    </div>
+
+    <div class="content-area">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-title">إجمالي الشكاوى</div>
+          <div class="stat-value total-complaints" id="totalComplaints">0</div>
+          <div class="stat-change up"><i class="fas fa-arrow-up"></i> 12% عن الشهر الماضي</div>
         </div>
-        <div style="display: flex; align-items: center;">
-            <button id="installButton" class="install-btn" style="display: none;">
-                <i class="fas fa-download"></i> تثبيت التطبيق
+        <div class="stat-card">
+          <div class="stat-title">شكاوى معلقة</div>
+          <div class="stat-value pending-complaints" id="pendingComplaints">0</div>
+          <div class="stat-change down"><i class="fas fa-arrow-down"></i> 5% عن الأسبوع الماضي</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">تم حلها</div>
+          <div class="stat-value resolved-complaints" id="resolvedComplaints">0</div>
+          <div class="stat-change up"><i class="fas fa-arrow-up"></i> 8% عن الأسبوع الماضي</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">مرفوضة</div>
+          <div class="stat-value rejected-complaints" id="rejectedComplaints">0</div>
+          <div class="stat-change"><i class="fas fa-equals"></i> لا يوجد تغيير</div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h4 class="chart-title">الشكاوى حسب الشهر</h4>
+        <canvas id="monthlyChart"></canvas>
+      </div>
+
+      <div class="table-container">
+        <div class="table-header">
+          <h3 class="table-title">آخر الشكاوى</h3>
+          <div class="table-filters">
+            <select id="complaintFilterStatus">
+              <option value="all">جميع الحالات</option>
+              <option value="pending">معلقة</option>
+              <option value="resolved">تم الحل</option>
+              <option value="rejected">مرفوضة</option>
+            </select>
+            <select id="complaintFilterBranch">
+              <option value="all">جميع الفروع</option>
+            </select>
+            <button id="refreshComplaintsBtn" class="refresh-btn">
+              <i class="fas fa-sync-alt"></i> تحديث
             </button>
-            <div class="admin-info">
-                <div class="admin-avatar">AD</div>
-                <span>مسؤول النظام</span>
-            </div>
+          </div>
         </div>
-    </header>
-    <div class="container">
-        <div class="stats-container">
-            <div class="stat-card">
-                <div class="stat-title"><i class="fas fa-list"></i> إجمالي الشكاوى</div>
-                <div class="stat-number" id="total-complaints">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title"><i class="fas fa-clock"></i> قيد المعالجة</div>
-                <div class="stat-number" id="pending-complaints">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title"><i class="fas fa-check-circle"></i> تم الحل</div>
-                <div class="stat-number" id="resolved-complaints">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-title"><i class="fas fa-times-circle"></i> مرفوضة</div>
-                <div class="stat-number" id="rejected-complaints">0</div>
-            </div>
+        <div class="table-responsive">
+          <table class="complaints-table">
+            <thead>
+              <tr>
+                <th>التاريخ</th>
+                <th>العميل</th>
+                <th>الحالة</th>
+                <th>الإجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="complaintsTableBody"></tbody>
+          </table>
         </div>
-        <div class="card">
-            <h2><i class="fas fa-list-alt"></i> إدارة الشكاوى</h2>
-            <div class="filters">
-                <div class="filter-group">
-                    <label for="status-filter">تصفية حسب الحالة</label>
-                    <select id="status-filter">
-                        <option value="all">جميع الحالات</option>
-                        <option value="pending">قيد المعالجة</option>
-                        <option value="resolved">تم الحل</option>
-                        <option value="rejected">مرفوضة</option>
-                    </select>
-                </div>
-                <div class="filter-group">
-                    <label for="search">بحث</label>
-                    <input type="text" id="search" placeholder="ابحث بالاسم أو رقم الهاتف...">
-                </div>
-            </div>
-            <div class="auto-refresh">
-                <input type="checkbox" id="auto-refresh" checked>
-                <label for="auto-refresh">تحديث تلقائي كل 30 ثانية</label>
-            </div>
-            <div class="sound-control">
-                <input type="checkbox" id="sound-enabled" checked>
-                <label for="sound-enabled">تشغيل صوت الإشعارات</label>
-            </div>
-            <div class="sound-test">
-                <button id="test-sound-btn" class="test-sound-btn">
-                    <i class="fas fa-volume-up"></i> اختبار الصوت
-                </button>
-            </div>
-            <div id="complaints-list" class="complaints-list">
-                <div class="empty-state">
-                    <i class="fas fa-inbox"></i>
-                    <h3>لا توجد شكاوى لعرضها</h3>
-                    <p>سيتم عرض الشكاوى هنا عند توفرها</p>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-    <!-- نموذج عرض الشكوى -->
-    <div id="complaint-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <div class="modal-header">
-                <h2><i class="fas fa-eye"></i> معاينة الشكوى</h2>
-            </div>
-            <div class="modal-body">
-                <div class="complaint-detail">
-                    <div class="detail-row">
-                        <div class="detail-label">رقم الشكوى:</div>
-                        <div class="detail-value" id="modal-id">-</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">الاسم:</div>
-                        <div class="detail-value" id="modal-name">-</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">رقم الهاتف:</div>
-                        <div class="detail-value" id="modal-phone">-</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">حالة الشكوى:</div>
-                        <div class="detail-value">
-                            <span class="status-badge" id="modal-status">-</span>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">التقييم:</div>
-                        <div class="detail-value" id="modal-rating">
-                            <div class="rating-stars" id="rating-stars">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">تفاصيل الشكوى:</div>
-                        <div class="detail-value" id="modal-complaint">-</div>
-                    </div>
-                    <div class="detail-row">
-                        <div class="detail-label">تاريخ الإضافة:</div>
-                        <div class="detail-value" id="modal-created-at">-</div>
-                    </div>
-                </div>
-                <div class="status-update">
-                    <h3><i class="fas fa-edit"></i> تحديث حالة الشكوى</h3>
-                    <div class="status-selector">
-                        <button class="status-btn status-btn-pending" data-status="pending">
-                            <i class="fas fa-clock"></i> قيد المعالجة
-                        </button>
-                        <button class="status-btn status-btn-resolved" data-status="resolved">
-                            <i class="fas fa-check-circle"></i> تم الحل
-                        </button>
-                        <button class="status-btn status-btn-rejected" data-status="rejected">
-                            <i class="fas fa-times-circle"></i> مرفوضة
-                        </button>
-                    </div>
-                </div>
-                <div class="comments-section">
-                    <h3><i class="fas fa-comments"></i> التعليقات</h3>
-                    <div id="comments-list" class="comments-list">
-                    </div>
-                    <div class="comment-form">
-                        <textarea id="comment-input" class="comment-input" placeholder="أضف تعليقًا هنا..."></textarea>
-                        <button id="add-comment-btn" class="comment-submit-btn">
-                            <i class="fas fa-plus"></i> إضافة تعليق
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-actions">
-                <button class="btn" id="close-modal-btn" style="background-color: #6c757d; color: white;">
-                    <i class="fas fa-times"></i> إغلاق
-                </button>
-                <button class="btn btn-edit" id="save-status-btn">
-                    <i class="fas fa-save"></i> حفظ التغييرات
-                </button>
-            </div>
+  </div>
+
+  <div class="details-modal" id="detailsModal">
+    <div class="details-content">
+      <div class="details-header">
+        <h3 class="details-title">تفاصيل الشكوى</h3>
+        <button class="close-details" id="closeDetailsBtn">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="details-body">
+        <div class="complaint-meta">
+          <div><strong>رقم الشكوى:</strong><span id="detailComplaintId"></span></div>
+          <div><strong>التاريخ:</strong><span id="detailComplaintDate"></span></div>
+          <div><strong>الحالة:</strong><span id="detailComplaintStatus"></span></div>
+          <div><strong>الهاتف:</strong><span id="detailComplaintPhone"></span></div>
+          <div><strong>الفرع:</strong><span id="detailComplaintBranch"></span></div>
         </div>
+        <div class="complaint-content">
+          <h5>نص الشكوى:</h5>
+          <p id="detailComplaintText"></p>
+        </div>
+
+        <!-- قسم الردود -->
+        <div class="comments-section" id="commentsSection">
+          <h5>الردود:</h5>
+          <div id="commentsList" class="comments-list">
+            <!-- سيتم ملؤه ديناميكيًا -->
+          </div>
+        </div>
+
+        <!-- إضافة رد جديد -->
+        <div class="add-comment-section" id="addCommentSection">
+          <h5>أضف ردًا:</h5>
+          <textarea id="newCommentText" placeholder="اكتب ردك هنا..."></textarea>
+          <button id="addCommentBtn" class="comment-btn">
+            <i class="fas fa-comment"></i> إضافة رد
+          </button>
+        </div>
+
+        <div class="resolution-section" id="resolutionSection">
+          <h5>ملاحظات الحل:</h5>
+          <p id="detailResolutionNotes"></p>
+          <div class="resolution-meta">
+            تم الحل بواسطة <span id="detailResolvedBy"></span> في 
+            <span id="detailResolvedAt"></span>
+          </div>
+        </div>
+        <div class="action-section" id="actionSection">
+          <h5>تغيير الحالة:</h5>
+          <div class="action-buttons">
+            <button class="action-btn resolve-btn" id="resolveBtn">
+              <i class="fas fa-check-circle"></i> تم الحل
+            </button>
+            <button class="action-btn reject-btn" id="rejectBtn">
+              <i class="fas fa-times-circle"></i> رفض
+            </button>
+            <button class="action-btn pending-btn" id="pendingBtn">
+              <i class="fas fa-clock"></i> إعادة للانتظار
+            </button>
+          </div>
+          <div class="resolution-input">
+            <label for="detailResolutionText">ملاحظات الحل:</label>
+            <textarea id="detailResolutionText" placeholder="أدخل ملاحظات الحل هنا..."></textarea>
+          </div>
+        </div>
+      </div>
     </div>
-    <!-- حاوية الإشعارات -->
-    <div id="toast-container" class="toast-container"></div>
-    <!-- ربط ملف الجافاسكريبت الخارجي -->
-    <script src="script.js"></script>
+  </div>
+
+  <div class="notification-alert" id="notificationAlert">
+    <i class="fas fa-bell"></i>
+    <span id="notificationText">شكوى جديدة تم تقديمها</span>
+  </div>
+  
+  <div class="toast" id="toast"></div>
+  
+  <button id="installPwaBtn" class="install-pwa-btn hidden">
+    <i class="fas fa-download"></i>
+  </button>
+
+  <script src="script.js"></script>
 </body>
 </html>
