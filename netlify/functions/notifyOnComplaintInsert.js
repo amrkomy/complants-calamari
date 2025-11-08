@@ -1,42 +1,28 @@
-// netlify/functions/notifyNewComplaint.js
+// netlify/functions/notifyOnComplaintInsert.js
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY;
 
 exports.handler = async (event) => {
+  // ✅ السماح فقط بـ POST
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, body: "Method Not Allowed" };
-  }
-
-  if (!ONESIGNAL_REST_KEY || !ONESIGNAL_APP_ID) {
     return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "OneSignal credentials missing in Netlify environment" }),
+      statusCode: 405,
+      body: JSON.stringify({ error: "Method Not Allowed. Use POST." })
     };
   }
 
   try {
-    const { complaint } = JSON.parse(event.body || "{}");
+    const payload = JSON.parse(event.body || "{}");
+    const complaint = payload.record; // ← لأن Supabase يُرسل السجل تحت "record"
 
-    if (!complaint || !complaint.id) {
+    if (!complaint) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Invalid complaint data" }),
+        body: JSON.stringify({ error: "Missing 'record' in payload" })
       };
     }
 
-    // ✅ ترميز المفتاح بشكل صحيح لـ Basic Auth
     const auth = Buffer.from(`:${ONESIGNAL_REST_KEY}`).toString("base64");
-
-    const payload = {
-      app_id: ONESIGNAL_APP_ID,
-     included_segments: ["Subscribed Users"], // أو "Subscribed Users"
-      headings: { ar: "شكوى جديدة!" },
-      contents: {
-        ar: `من: ${complaint.name || "عميل"} - ${complaint.phone || ""}`
-      },
-      url: "https://admin-complants-calamari.netlify.app/", // رابط لوحة التحكم
-      chrome_web_image: "https://admin-complants-calamari.netlify.app/icon-192.png"
-    };
 
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
       method: "POST",
@@ -44,7 +30,15 @@ exports.handler = async (event) => {
         "Content-Type": "application/json",
         "Authorization": `Basic ${auth}`
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        app_id: ONESIGNAL_APP_ID,
+        included_segments: ["Subscribed Users"], // ✅ غيره من "All"
+        headings: { ar: "شكوى جديدة!" },
+        contents: { 
+          ar: `من: ${complaint.customer_name || "عميل"}`
+        },
+        url: "https://admin-complants-calamari.netlify.app/"
+      })
     });
 
     const result = await response.json();
@@ -56,7 +50,7 @@ exports.handler = async (event) => {
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Function failed", details: err.message })
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
