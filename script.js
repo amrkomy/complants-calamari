@@ -548,11 +548,8 @@ function setupRealtimeUpdates() {
       schema: 'public',
       table: 'complaints'
     }, (payload) => {
-      showNewComplaintNotification(payload.new);
-      sendOneSignalNotification(payload.new); // ← إرسال إشعار فوري
-      loadComplaints();
-      loadStats();
-      loadChartsData();
+      // تحديث فوري دون انتظار إعادة التحميل
+      loadComplaints(); // هذه الدالة تكتشف الشكوى الجديدة وتُظهر إشعارًا
     })
     .subscribe();
 }
@@ -591,3 +588,4 @@ function setupEventListeners() {
     if (e.target === detailsModal) detailsModal.style.display = 'none';
   });
 }
+
