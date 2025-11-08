@@ -29,7 +29,7 @@ exports.handler = async (event) => {
 
     const payload = {
       app_id: ONESIGNAL_APP_ID,
-      included_segments: ["Subscribed Users"], // أو "Subscribed Users"
+     included_segments: ["Subscribed Users"], // أو "Subscribed Users"
       headings: { ar: "شكوى جديدة!" },
       contents: {
         ar: `من: ${complaint.name || "عميل"} - ${complaint.phone || ""}`
