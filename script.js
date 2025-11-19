@@ -19,6 +19,9 @@ const commentsList = document.getElementById('commentsList');
 const newCommentText = document.getElementById('newCommentText');
 const addCommentBtn = document.getElementById('addCommentBtn');
 
+// أزرار جديدة
+const enableNotificationsBtn = document.getElementById('enableNotificationsBtn');
+
 let monthlyChart;
 let currentComplaintId = null;
 let allBranches = [];
@@ -26,12 +29,7 @@ let realtimeChannel = null;
 let deferredPrompt = null;
 let lastComplaintIds = new Set();
 
-// ======== دالة إرسال إشعار عبر Netlify Function (آمنة) ========
-/**
- * يُرسل إشعارًا عبر Netlify Function
- * @param {string} type - "new_complaint" أو "broadcast_to_customers"
- * @param {object} data - بيانات الإشعار
- */
+// ======== دالة إرسال إشعار عبر Netlify Function ========
 async function sendNotification(type, data) {
   try {
     const response = await fetch("/.netlify/functions/notify", {
@@ -44,6 +42,26 @@ async function sendNotification(type, data) {
     }
   } catch (e) {
     console.warn("خطأ في إرسال الإشعار:", e);
+  }
+}
+
+// ======== تفعيل إشعارات OneSignal ========
+async function enableAdminNotifications() {
+  try {
+    if (!window.OneSignal) {
+      showToast("OneSignal غير جاهز بعد. حاول مرة أخرى.", 3000);
+      return;
+    }
+    const status = await window.OneSignal.User.PushSubscription.getPermissionStatus();
+    if (status === 'granted') {
+      showToast("الإشعارات مفعلة مسبقًا ✅", 2000);
+    } else {
+      await window.OneSignal.User.PushSubscription.optIn();
+      showToast("تم تفعيل إشعارات الشكاوى بنجاح! 🔔", 3000);
+    }
+  } catch (err) {
+    console.error("فشل تفعيل الإشعارات:", err);
+    showToast("فشل تفعيل الإشعارات. تحقق من إعدادات المتصفح.", 3000);
   }
 }
 
@@ -414,6 +432,7 @@ async function showComplaintDetails(complaintId) {
     document.getElementById('actionSection').style.display = 'block';
     document.getElementById('detailResolutionText').value = '';
     
+    // تحميل الردود
     await loadComplaintComments(c.id);
     
     detailsModal.style.display = 'flex';
@@ -590,34 +609,53 @@ function setupEventListeners() {
     if (e.target === detailsModal) detailsModal.style.display = 'none';
   });
 
-  // ============ إرسال إشعارات جماعية ============
-  document.getElementById('sendBroadcastBtn').addEventListener('click', () => {
-    document.getElementById('broadcastModal').style.display = 'flex';
-  });
+  // ✅ زر تفعيل إشعارات الإدارة
+  if (enableNotificationsBtn) {
+    enableNotificationsBtn.addEventListener('click', enableAdminNotifications);
+  }
 
-  document.getElementById('cancelBroadcast').addEventListener('click', () => {
-    document.getElementById('broadcastModal').style.display = 'none';
-  });
+  // ✅ زر إرسال إشعارات للعملاء
+  const sendBroadcastBtn = document.getElementById('sendBroadcastBtn');
+  const cancelBroadcast = document.getElementById('cancelBroadcast');
+  const confirmBroadcast = document.getElementById('confirmBroadcast');
+  const broadcastModal = document.getElementById('broadcastModal');
+  const broadcastTitle = document.getElementById('broadcastTitle');
+  const broadcastMessage = document.getElementById('broadcastMessage');
+  const broadcastUrl = document.getElementById('broadcastUrl');
 
-  document.getElementById('confirmBroadcast').addEventListener('click', async () => {
-    const title = document.getElementById('broadcastTitle').value.trim();
-    const message = document.getElementById('broadcastMessage').value.trim();
-    
-    if (!message) {
-      showToast('نص الإشعار مطلوب', 3000);
-      return;
-    }
-    
-    await sendNotification("broadcast_to_customers", {
-      title,
-      message,
-      url: document.getElementById('broadcastUrl').value.trim() || "https://your-restaurant-site.com/"
+  if (sendBroadcastBtn) {
+    sendBroadcastBtn.addEventListener('click', () => {
+      if (broadcastModal) broadcastModal.style.display = 'flex';
     });
-    
-    showToast('تم إرسال الإشعار للعملاء بنجاح!', 3000);
-    document.getElementById('broadcastModal').style.display = 'none';
-    document.getElementById('broadcastTitle').value = '';
-    document.getElementById('broadcastMessage').value = '';
-    document.getElementById('broadcastUrl').value = '';
-  });
+  }
+
+  if (cancelBroadcast) {
+    cancelBroadcast.addEventListener('click', () => {
+      if (broadcastModal) broadcastModal.style.display = 'none';
+    });
+  }
+
+  if (confirmBroadcast) {
+    confirmBroadcast.addEventListener('click', async () => {
+      const title = broadcastTitle?.value.trim() || '';
+      const message = broadcastMessage?.value.trim() || '';
+      
+      if (!message) {
+        showToast('نص الإشعار مطلوب', 3000);
+        return;
+      }
+      
+      await sendNotification("broadcast_to_customers", {
+        title,
+        message,
+        url: broadcastUrl?.value.trim() || "https://alrayis-calamari.netlify.app/"
+      });
+      
+      showToast('تم إرسال الإشعار للعملاء بنجاح!', 3000);
+      if (broadcastModal) broadcastModal.style.display = 'none';
+      if (broadcastTitle) broadcastTitle.value = '';
+      if (broadcastMessage) broadcastMessage.value = '';
+      if (broadcastUrl) broadcastUrl.value = '';
+    });
+  }
 }
