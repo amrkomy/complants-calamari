@@ -27,13 +27,13 @@ let realtimeChannel = null;
 let deferredPrompt = null;
 let lastComplaintIds = new Set(); // ← للكشف عن الشكاوى الجديدة
 
-// ======== دالة إرسال إشعار OneSignal عبر Netlify Function ========
-async function sendOneSignalNotification(complaint) {
+// ======== دالة إرسال إشعار OneSignal عبر Netlify Function داخلي ========
+async function sendNotificationToRole(type, data) {
   try {
-    const response = await fetch("/.netlify/functions/notifyNewComplaint", {
+    const response = await fetch("/.netlify/functions/notify", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ complaint })
+      body: JSON.stringify({ type, data })
     });
     if (!response.ok) {
       console.warn("OneSignal notification failed:", await response.json());
@@ -186,7 +186,8 @@ async function loadComplaints() {
     if (newComplaints.length > 0) {
       newComplaints.forEach(complaint => {
         showNewComplaintNotification(complaint);
-        sendOneSignalNotification(complaint); // ← إرسال إشعار OneSignal
+        // ✅ إرسال إشعار "شكوى جديدة" للإدارة فقط
+        sendNotificationToRole("new_complaint", complaint);
       });
     }
     lastComplaintIds = currentIds;
@@ -548,8 +549,7 @@ function setupRealtimeUpdates() {
       schema: 'public',
       table: 'complaints'
     }, (payload) => {
-      // تحديث فوري دون انتظار إعادة التحميل
-      loadComplaints(); // هذه الدالة تكتشف الشكوى الجديدة وتُظهر إشعارًا
+      loadComplaints();
     })
     .subscribe();
 }
@@ -587,5 +587,36 @@ function setupEventListeners() {
   detailsModal.addEventListener('click', (e) => {
     if (e.target === detailsModal) detailsModal.style.display = 'none';
   });
-}
 
+  // ============ إعدادات زر إرسال الإشعارات ============
+  document.getElementById('sendBroadcastBtn').addEventListener('click', () => {
+    document.getElementById('broadcastModal').style.display = 'flex';
+  });
+
+  document.getElementById('cancelBroadcast').addEventListener('click', () => {
+    document.getElementById('broadcastModal').style.display = 'none';
+  });
+
+  document.getElementById('confirmBroadcast').addEventListener('click', async () => {
+    const title = document.getElementById('broadcastTitle').value.trim();
+    const message = document.getElementById('broadcastMessage').value.trim();
+    
+    if (!message) {
+      showToast('نص الإشعار مطلوب', 3000);
+      return;
+    }
+    
+    await sendNotificationToRole("broadcast_to_customers", {
+      title,
+      message,
+      url: document.getElementById('broadcastUrl').value.trim() || "https://your-restaurant-site.com/"
+    });
+    
+    showToast('تم إرسال الإشعار للعملاء بنجاح!', 3000);
+    document.getElementById('broadcastModal').style.display = 'none';
+    // مسح الحقول
+    document.getElementById('broadcastTitle').value = '';
+    document.getElementById('broadcastMessage').value = '';
+    document.getElementById('broadcastUrl').value = '';
+  });
+}
