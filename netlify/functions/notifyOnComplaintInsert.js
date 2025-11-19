@@ -34,9 +34,9 @@ exports.handler = async (event) => {
     const payload = {
       app_id,
       included_segments: ["Subscribed Users"],
-      headings: { ar: "إشعار من Cesaro" },
+      headings: { ar: "إشعار من calamari" },
       contents,
-      url: data.url || "https://admin-complants-calamari.netlify.app/"
+      url: data.url || "https://calamari-message.netlify.app/"
     };
 
     // ✅ استخدام المفتاح الصحيح لكل تطبيق
