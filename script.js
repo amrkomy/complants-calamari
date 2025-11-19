@@ -15,7 +15,6 @@ const notificationText = document.getElementById('notificationText');
 const toast = document.getElementById('toast');
 const installPwaBtn = document.getElementById('installPwaBtn');
 
-// متغيرات الردود الجديدة
 const commentsList = document.getElementById('commentsList');
 const newCommentText = document.getElementById('newCommentText');
 const addCommentBtn = document.getElementById('addCommentBtn');
@@ -25,10 +24,15 @@ let currentComplaintId = null;
 let allBranches = [];
 let realtimeChannel = null;
 let deferredPrompt = null;
-let lastComplaintIds = new Set(); // ← للكشف عن الشكاوى الجديدة
+let lastComplaintIds = new Set();
 
-// ======== دالة إرسال إشعار OneSignal عبر Netlify Function داخلي ========
-async function sendNotificationToRole(type, data) {
+// ======== دالة إرسال إشعار عبر Netlify Function (آمنة) ========
+/**
+ * يُرسل إشعارًا عبر Netlify Function
+ * @param {string} type - "new_complaint" أو "broadcast_to_customers"
+ * @param {object} data - بيانات الإشعار
+ */
+async function sendNotification(type, data) {
   try {
     const response = await fetch("/.netlify/functions/notify", {
       method: "POST",
@@ -36,10 +40,10 @@ async function sendNotificationToRole(type, data) {
       body: JSON.stringify({ type, data })
     });
     if (!response.ok) {
-      console.warn("OneSignal notification failed:", await response.json());
+      console.warn("فشل إرسال الإشعار:", await response.json());
     }
   } catch (e) {
-    console.warn("Failed to send OneSignal notification:", e);
+    console.warn("خطأ في إرسال الإشعار:", e);
   }
 }
 
@@ -180,14 +184,13 @@ async function loadComplaints() {
     
     if (error) throw error;
     
-    // ← الكشف عن الشكاوى الجديدة
     const currentIds = new Set(complaints.map(c => c.id));
     const newComplaints = complaints.filter(c => !lastComplaintIds.has(c.id));
     if (newComplaints.length > 0) {
       newComplaints.forEach(complaint => {
         showNewComplaintNotification(complaint);
         // ✅ إرسال إشعار "شكوى جديدة" للإدارة فقط
-        sendNotificationToRole("new_complaint", complaint);
+        sendNotification("new_complaint", complaint);
       });
     }
     lastComplaintIds = currentIds;
@@ -411,7 +414,6 @@ async function showComplaintDetails(complaintId) {
     document.getElementById('actionSection').style.display = 'block';
     document.getElementById('detailResolutionText').value = '';
     
-    // تحميل الردود
     await loadComplaintComments(c.id);
     
     detailsModal.style.display = 'flex';
@@ -588,7 +590,7 @@ function setupEventListeners() {
     if (e.target === detailsModal) detailsModal.style.display = 'none';
   });
 
-  // ============ إعدادات زر إرسال الإشعارات ============
+  // ============ إرسال إشعارات جماعية ============
   document.getElementById('sendBroadcastBtn').addEventListener('click', () => {
     document.getElementById('broadcastModal').style.display = 'flex';
   });
@@ -606,7 +608,7 @@ function setupEventListeners() {
       return;
     }
     
-    await sendNotificationToRole("broadcast_to_customers", {
+    await sendNotification("broadcast_to_customers", {
       title,
       message,
       url: document.getElementById('broadcastUrl').value.trim() || "https://your-restaurant-site.com/"
@@ -614,7 +616,6 @@ function setupEventListeners() {
     
     showToast('تم إرسال الإشعار للعملاء بنجاح!', 3000);
     document.getElementById('broadcastModal').style.display = 'none';
-    // مسح الحقول
     document.getElementById('broadcastTitle').value = '';
     document.getElementById('broadcastMessage').value = '';
     document.getElementById('broadcastUrl').value = '';
