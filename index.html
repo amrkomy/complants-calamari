@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#000000"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>إدارة الشكاوى | Cesaro</title>
+  <title>إدارة الشكاوى | كليماري</title>
   <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -19,12 +19,55 @@
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "4d4396ed-4766-4646-8449-07fa9c7db4f1",
-        notifyButton: { enable: false }
+        appId: "4d4396ed-4766-4646-8449-07fa9c7db4f1"
       });
+      // ✅ تمييز تلقائي: هذا المستخدم "مسؤول"
+      await OneSignal.User.addTag("role", "admin");
     });
   </script>
   <style>
+    /* Modal إرسال الإشعارات */
+    #broadcastModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+    }
+    #broadcastModal .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      font-family: 'Tajawal', sans-serif;
+      direction: rtl;
+    }
+    #broadcastModal input,
+    #broadcastModal textarea {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 14px;
+    }
+    #broadcastModal button {
+      padding: 10px 20px;
+      margin: 5px;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Tajawal', sans-serif;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #confirmBroadcast { background: #000; color: white; }
+    #cancelBroadcast { background: #ddd; color: #333; }
+
     /* تحسينات إضافية للواجهة */
     .install-pwa-btn {
       position: fixed;
@@ -137,9 +180,10 @@
     <div class="top-bar">
       <h2 class="page-title">إدارة الشكاوى</h2>
       <div class="top-bar-actions">
-        <a href="https://calamari-message.netlify.app/" class="stats-btn">
-          <i class="fas fa-chart-line"></i> ارسال اشعارات للمتابعين
-        </a>
+        <!-- ✅ زر داخلي لإرسال إشعارات للعملاء (مش رابط خارجي) -->
+        <button id="sendBroadcastBtn" class="stats-btn">
+          <i class="fas fa-bell"></i> إرسال إشعار للعملاء
+        </button>
         <div class="user-avatar">c</div>
       </div>
     </div>
@@ -287,7 +331,20 @@
     <i class="fas fa-download"></i>
   </button>
 
+  <!-- Modal إرسال إشعار جماعي -->
+  <div id="broadcastModal">
+    <div class="modal-content">
+      <h3>إرسال إشعار جماعي للعملاء</h3>
+      <input type="text" id="broadcastTitle" placeholder="العنوان (اختياري)" />
+      <textarea id="broadcastMessage" placeholder="نص الإشعار (مطلوب)" rows="4"></textarea>
+      <input type="url" id="broadcastUrl" placeholder="رابط (اختياري)" />
+      <div style="text-align: center; margin-top: 15px;">
+        <button id="confirmBroadcast">إرسال</button>
+        <button id="cancelBroadcast">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
-
