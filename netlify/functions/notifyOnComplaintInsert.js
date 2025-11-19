@@ -1,9 +1,9 @@
-// netlify/functions/notifyOnComplaintInsert.js
+// netlify/functions/notify.js
+
 const ONESIGNAL_APP_ID = process.env.ONESIGNAL_APP_ID;
 const ONESIGNAL_REST_KEY = process.env.ONESIGNAL_REST_KEY;
 
 exports.handler = async (event) => {
-  // التحقق من طريقة الطلب
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -11,58 +11,67 @@ exports.handler = async (event) => {
     };
   }
 
-  // التحقق من وجود المفاتيح
-  if (!ONESIGNAL_REST_KEY || !ONESIGNAL_APP_ID) {
+  if (!ONESIGNAL_APP_ID || !ONESIGNAL_REST_KEY) {
     console.error("❌ Missing OneSignal credentials in Netlify env");
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Server misconfiguration: missing OneSignal keys" })
+      body: JSON.stringify({ error: "Server config error: missing OneSignal keys" })
     };
   }
 
   try {
-    // تحليل الجسم
     const body = JSON.parse(event.body || "{}");
-    const complaint = body.record; // Supabase Webhook يُرسل السجل تحت "record"
+    const { type, data } = body;
 
-    if (!complaint) {
+    if (!type || !data) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: "Missing 'record' in payload" })
+        body: JSON.stringify({ error: "Missing 'type' or 'data'" })
       };
     }
 
-    // ✅ ترميز المفتاح بشكل صحيح لـ Basic Auth
+    let payload;
+
+    if (type === "new_complaint") {
+      // ➡️ إشعار للإدارة فقط
+      payload = {
+        app_id: ONESIGNAL_APP_ID,
+        filters: [{ field: "tag", key: "role", relation: "=", value: "admin" }],
+        headings: { ar: "شكوى جديدة!" },
+        contents: {
+          ar: `من: ${data.customer_name || "عميل"}${data.customer_phone ? " - " + data.customer_phone : ""}`
+        },
+        url: "https://admin-complants-calamari.netlify.app/"
+      };
+    } 
+    else if (type === "broadcast_to_customers") {
+      // ➡️ إشعار للعملاء فقط
+      payload = {
+        app_id: ONESIGNAL_APP_ID,
+        filters: [{ field: "tag", key: "role", relation: "=", value: "customer" }],
+        headings: { ar: data.title || "إشعار جديد" },
+        contents: { ar: data.message || "" },
+        url: data.url || "https://your-restaurant-site.com/"
+      };
+    } 
+    else {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: "Invalid notification type" })
+      };
+    }
+
     const auth = Buffer.from(`:${ONESIGNAL_REST_KEY}`).toString("base64");
-
-    // إعداد حمولة OneSignal
-    const payload = {
-      app_id: ONESIGNAL_APP_ID,
-      included_segments: ["Subscribed Users"], // ← لا تستخدم "All"
-      headings: { ar: "شكوى جديدة!" },
-      contents: {
-        ar: `من: ${complaint.customer_name || "عميل"} - ${complaint.customer_phone || ""}`
-      },
-      url: "https://admin-complants-calamari.netlify.app/"
-    };
-
-    // إرسال الطلب إلى OneSignal
     const response = await fetch("https://onesignal.com/api/v1/notifications", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Basic ${auth}` // ← هذا هو التنسيق الصحيح
+        "Authorization": `Basic ${auth}`
       },
       body: JSON.stringify(payload)
     });
 
     const result = await response.json();
-
-    // تسجيل الخطأ في السجلات إن وُجد
-    if (!response.ok) {
-      console.error("OneSignal API error:", result);
-    }
-
     return {
       statusCode: response.status,
       headers: { "Access-Control-Allow-Origin": "*" },
