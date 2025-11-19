@@ -33,7 +33,7 @@ exports.handler = async (event) => {
         contents: {
           ar: `من: ${data.customer_name || "عميل"}${data.customer_phone ? " - " + data.customer_phone : ""}`
         },
-        url: "https://admin-complants-calamari.netlify.app/"
+        url: "https://calamari-message.netlify.app/"
       };
     }
     else if (type === "broadcast_to_customers") {
