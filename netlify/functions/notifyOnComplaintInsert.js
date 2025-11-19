@@ -7,7 +7,7 @@ exports.handler = async (event) => {
   const CUSTOMER_REST_KEY = process.env.ONESIGNAL_CUSTOMER_REST_KEY; // للمطعم
   const ADMIN_REST_KEY = process.env.ONESIGNAL_ADMIN_REST_KEY;       // للإدارة
 
-  const CUSTOMER_APP_ID = "4d4396ed-4766-4646-8449-07fa9c7db4f1";
+  const CUSTOMER_APP_ID = "4d439644444ed-4766-4646-8449-07fa9c7db4f1";
   const ADMIN_APP_ID = "fb14d9b6-5b07-47c7-bc70-ff2495372d38";
 
   try {
