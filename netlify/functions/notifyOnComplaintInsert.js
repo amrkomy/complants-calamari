@@ -42,7 +42,7 @@ exports.handler = async (event) => {
         included_segments: ["Subscribed Users"],
         headings: { ar: data.title || "إشعار مهم" },
         contents: { ar: data.message || "" },
-        url: data.url || "https://your-restaurant-site.com/"
+        url: data.url || "https://alrayis-calamari.netlify.app/"
       };
     }
     else {
