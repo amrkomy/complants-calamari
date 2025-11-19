@@ -6,26 +6,26 @@
   <meta name="theme-color" content="#000000"/>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>إدارة الشكاوى | كليماري</title>
+  <title>إدارة الشكاوى | Cesaro</title>
   <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- OneSignal Web SDK - App ID للإدارة -->
+  <!-- OneSignal Web SDK -->
   <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
   <script>
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     OneSignalDeferred.push(async function(OneSignal) {
       await OneSignal.init({
-        appId: "fb14d9b6-5b07-47c7-bc70-ff2495372d38" // ← App ID خاص بالإدارة
+        appId: "fb14d9b6-5b07-47c7-bc70-ff2495372d38" // App ID الإدارة
       });
     });
   </script>
   <style>
-    /* Modal إرسال الإشعارات */
-    #broadcastModal {
+    /* Modal الإرسال */
+    #broadcastModal, #notificationPromptModal {
       display: none;
       position: fixed;
       top: 0; left: 0;
@@ -35,7 +35,7 @@
       justify-content: center;
       align-items: center;
     }
-    #broadcastModal .modal-content {
+    .modal-content {
       background: #fff;
       padding: 20px;
       border-radius: 12px;
@@ -44,8 +44,8 @@
       font-family: 'Tajawal', sans-serif;
       direction: rtl;
     }
-    #broadcastModal input,
-    #broadcastModal textarea {
+    .modal-content input,
+    .modal-content textarea {
       width: 100%;
       padding: 10px;
       margin: 8px 0;
@@ -54,7 +54,7 @@
       font-family: 'Tajawal', sans-serif;
       font-size: 14px;
     }
-    #broadcastModal button {
+    .modal-content button {
       padding: 10px 20px;
       margin: 5px;
       border: none;
@@ -64,9 +64,9 @@
       font-size: 14px;
     }
     #confirmBroadcast { background: #000; color: white; }
-    #cancelBroadcast { background: #ddd; color: #333; }
+    #cancelBroadcast, #closePromptModal { background: #ddd; color: #333; }
 
-    /* باقي الأنماط (من الكود الأصلي) */
+    /* باقي الأنماط (كما هي) */
     .install-pwa-btn {
       position: fixed;
       bottom: 20px;
@@ -109,14 +109,19 @@
     <div class="top-bar">
       <h2 class="page-title">إدارة الشكاوى</h2>
       <div class="top-bar-actions">
-        <!-- ✅ زر داخلي لإرسال إشعارات للعملاء -->
+        <!-- ✅ زر تفعيل إشعارات الإدارة -->
+        <button id="enableNotificationsBtn" class="stats-btn">
+          <i class="fas fa-bell"></i> تفعيل إشعارات الشكاوى
+        </button>
+        <!-- ✅ زر إرسال إشعارات للعملاء -->
         <button id="sendBroadcastBtn" class="stats-btn">
-          <i class="fas fa-bell"></i> إرسال إشعار للعملاء
+          <i class="fas fa-bullhorn"></i> إرسال إشعار للعملاء
         </button>
         <div class="user-avatar">c</div>
       </div>
     </div>
 
+    <!-- باقي محتوى الصفحة (stats, table, etc.) -->
     <div class="content-area">
       <div class="stats-grid">
         <div class="stat-card">
@@ -181,10 +186,12 @@
     </div>
   </div>
 
-  <!-- Modal التفاصيل (كما هو) -->
-  <div class="details-modal" id="detailsModal"> ... </div>
+  <!-- Modal تفاصيل الشكوى (احتفظ به من ملفك الأصلي كما هو) -->
+  <div class="details-modal" id="detailsModal">
+    <!-- ... (نفس المحتوى الأصلي بدون تغيير) ... -->
+  </div>
 
-  <!-- عناصر واجهة المستخدم -->
+  <!-- عناصر واجهة الإشعارات -->
   <div class="notification-alert" id="notificationAlert">
     <i class="fas fa-bell"></i>
     <span id="notificationText">شكوى جديدة تم تقديمها</span>
@@ -211,4 +218,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
